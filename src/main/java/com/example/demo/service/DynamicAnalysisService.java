@@ -1480,7 +1480,7 @@ public class DynamicAnalysisService {
 		  	try {
 
 //		  		System.out.println(command.toString());
-		  		Process process = Runtime.getRuntime().exec(getCMDCommand(uppaalPath, fileName, filePath));
+		  		Process process = Runtime.getRuntime().exec(getLinuxCommand(uppaalPath, fileName, filePath));
 		  		error = process.getErrorStream();
 //		  		long startTime0=System.currentTimeMillis();
 		  		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream(),Charset.forName("UTF-8")));

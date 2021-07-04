@@ -116,11 +116,17 @@ public class Controller {
 	public static List<String> getVisualizationResult(String initModelFileName) throws DocumentException, IOException {
 //		String fileNameWithoutSuffix=initModelFileName.substring(0, initModelFileName.lastIndexOf(".xml"));
 //		String bestResultFileName=fileNameWithoutSuffix+"-scenario-best.txt";
-		
-		String path=AddressService.VIDEO_PATH+"\\video.mp4";
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String path=AddressService.VIDEO_PATH+"video.mp4";
 		List<String> path0=new ArrayList<String>();
 		System.out.println(path);
-		path0.add(path);
+		path0.add("video.mp4");
+		
 		return path0;
 	}
 	
