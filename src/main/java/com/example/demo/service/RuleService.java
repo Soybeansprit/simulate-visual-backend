@@ -3,6 +3,9 @@ package com.example.demo.service;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -365,6 +368,75 @@ public class RuleService {
 			}			
 		}		
 		return rules;
+	}
+	
+	public static String getAudioToRules(String audioFileName,String audioPath,String convertToolPath) {
+		  InputStream error = null;
+		  	try {
+
+//		  		System.out.println(command.toString());
+		  		Process process = Runtime.getRuntime().exec(getCMDCommand(convertToolPath, audioFileName, audioPath));
+		  		error = process.getErrorStream();
+//		  		long startTime0=System.currentTimeMillis();
+		  		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream(),Charset.forName("UTF-8")));
+//		  		long endTime0=System.currentTimeMillis();
+//	  			System.out.println("simulationData time: "+(endTime0-startTime0));
+		  		StringBuffer resultBuffer = new StringBuffer();
+		  		String s = "";
+		  		s = bufferedReader.readLine();
+		  		if(s==null) {
+		  			System.out.println("null");
+		  		}
+		  		while (s != null) {
+//		  			System.out.println(s);
+		  			resultBuffer.append(s+"\n");
+//		  			long startTime=System.currentTimeMillis();
+		  			s = bufferedReader.readLine();
+//		  			long endTime=System.currentTimeMillis();
+//		  			System.out.println("readline time: "+(endTime-startTime));
+//		  			if(s!=null) {
+//		  				System.out.println(s.toString());	
+//		  			}
+		  			
+		  		}
+		  		bufferedReader.close();
+		  		process.waitFor();
+		  		String result=resultBuffer.toString();
+//		  		int formulaIsSatisfiedIndex=result.indexOf("Formula is satisfied.");
+//		  		if(formulaIsSatisfiedIndex>=0) {
+//		  			result=result.substring(formulaIsSatisfiedIndex).substring("Formula is satisfied.".length());
+//		  		}
+		  		return result;
+		  	} catch (Exception ex) {
+		  		if (error != null) {
+		  			try {
+		  				error.close();
+		  			} catch (IOException e) {
+		  				e.printStackTrace();
+		  			}
+		  		}
+		  		return ex.getMessage();
+		  	}
+
+	}
+	
+	public static String getCMDCommand(String convertToolPath,String audioFileName,String audioFilePath) {
+  		StringBuffer command = new StringBuffer();
+  		command.append("cmd /c ");
+  		//这里的&&在多条语句的情况下使用，表示等上一条语句执行成功后在执行下一条命令，
+  		//也可以使用&表示执行上一条后台就立刻执行下一条语句
+  		command.append(String.format(" && python3 %s %s",convertToolPath,audioFilePath+audioFileName));
+  		
+  		return command.toString();
+	}
+	
+	public static String getLinuxCommand(String convertToolPath,String audioFileName,String audioFilePath) {
+  		StringBuffer command = new StringBuffer();
+  		//这里的&&在多条语句的情况下使用，表示等上一条语句执行成功后在执行下一条命令，
+  		//也可以使用&表示执行上一条后台就立刻执行下一条语句
+  		command.append(String.format("python 3 %s %s", convertToolPath,audioFilePath+audioFileName));
+  		
+  		return command.toString();
 	}
 	
 	

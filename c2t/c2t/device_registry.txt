@@ -1,0 +1,20 @@
+#d:domain->event->state->service->type->effect
+#s:binary->device_class->monitored entity->true type->false type
+#s:numeric->device_class->monitored entity
+d:light->lturnon->lon->turn_on->turned_on->light.brightness+
+d:light->lturnoff->loff->turn_off->turned_off->light.brightness-
+d:fan.fan->fturnon->fon->turn_on->turned_on->air.temperature-
+d:fan.fan->fturnoff->foff->turn_off->turned_off->air.temperature+
+d:fan.humidifier->hturnon->hon->turn_on->turned_on->air.humidity+
+d:fan.humidifier->hturnoff->hoff->turn_off->turned_off->air.humidity-
+d:fan.purifier->pturnon->pon->turn_on->turned_on->CO2.ppm-
+d:fan.purifier->pturnoff->poff->turn_off->turned_off->CO2.ppm+
+d:vacuum->vturnon->von->start->null->null
+d:vacuum->vturnoff->voff->stop->null->null
+d:camera->cturnon->con->turn_on->turned_on->null
+d:camera->cturnoff->coff->turn_off->turned_off->null
+s:binary->opening->door.open->opened->not_opened
+s:binary->motion->person.in->motion->no_motion
+s:numeric->temperature->air.temperature
+s:numeric->illuminance->light.brightness
+s:numeric->humidity->air.humidity

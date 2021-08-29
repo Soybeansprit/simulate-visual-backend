@@ -1,0 +1,11 @@
+fan.humidifier->null->fan.xiaomi_air_humidifier->office
+vacuum->null->vacuum.xiaomi_vacuum_1c->office
+fan.purifier->null->fan.xiaomi_air_purifier_2s->office
+light->2aa2d30f3b24d1a598d18d7a566a1de4->light.aqara_hub_m1s_4729->nonono
+temperature->0e1726f9704dc3cfbf7c038f477d6be0->sensor.temperature_sensor_c5e1_temperature->office
+opening->d894c20c03ba7e40263b8889e7e24b07->binary_sensor.window_and_door_sensor_2825->office
+motion->3572f4248b12b2470d199d027a23d1b4->binary_sensor.motion_sensor_6dc9->office
+light->0e9aaa2b980c2309c87d3f4720b1bcf4->light.midesklamppro_7a9b->office
+illuminance->223eedf22b004368e7b9950dc7710c1e->sensor.light_sensor_2773_light_level->office
+fan.fan->null->fan.xiaomi_smart_fan->office
+humidity->0e1726f9704dc3cfbf7c038f477d6be0->sensor.temperature_sensor_c5e1_humidity->office

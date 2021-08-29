@@ -1,0 +1,21 @@
+air.humidity should increase->humidifier.hon
+allow sweeping the floor->vacuum.von
+allow monitoring the room->camera.con
+forbid monitoring the room->camera.coff
+s:TemperatureSensor->air.temperature
+s:HumiditySensor->air.humidity
+s:LightSensor->light.brightness
+s:CO2Sensor->co2.ppm
+s:InfraredSensor->person.number
+s:InfraredSensor->person.distancefrommc
+s:InfraredSensor->person.distancefrompro
+s:RainSensor->weather.raining
+r:ac.coldon->power=700//cooler=1
+r:ac.hoton->power=1500//heater=1
+r:mc.mon->power=20
+r:projector.pon->power=350
+r:light.lon->power=5
+r:af.afon->power=500
+r:ah.ahon->power=500
+r:fan.fon->power=15//cooler=1
+r:heater.hon->power=2000//heater=1

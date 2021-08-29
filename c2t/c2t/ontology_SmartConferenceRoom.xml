@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ontology>
+	<environment>
+		<attribute name="person.number"/>
+		<attribute name="air.temperature"/>
+		<attribute name="air.humidity"/>
+		<attribute name="air.smoke"/>
+		<attribute name="light.brightness"/>
+		<attribute name="sound.loudness"/>
+		<attribute name="sound.ultrasonic"/>
+		<attribute name="co2.ppm"/>
+	</environment>
+	<devices>
+		<device name="bulb">
+			<states>
+				<state name="bon" init="false">
+					<adjust_entity name="light.brightness" energy="5" rate="50000" method="prompt"/>
+				</state>
+			</states>
+		</device>
+		<device name="heater">
+			<states>
+				<state name="hon" init="false">
+					<adjust_entity name="air.temperature" energy="2000" rate="0.4" method="/second"/>
+				</state>
+			</states>
+		</device>
+		<device name="ac">
+			<states>
+				<state name="coldon" init="false">
+					<adjust_entity name="air.temperature" energy="700" rate="-0.2" method="/second"/>
+				</state>
+				<state name="hoton" init="false">
+					<adjust_entity name="air.temperature" energy="1500" rate="0.2" method="/second"/>
+				</state>
+			</states>
+		</device>
+		<device name="fan">
+			<states>
+				<state name="fon" init="false">
+					<adjust_entity name="air.temperature" energy="30" rate="-0.05" method="/second"/>
+				</state>
+			</states>
+		</device>
+		<device name="af">
+			<states>
+				<state name="afon" init="false">
+					<adjust_entity name="co2.ppm" energy="500" rate="-10" method="/second"/>
+				</state>
+			</states>
+		</device>
+		<device name="ah">
+			<states>
+				<state name="ahon" init="false">
+					<adjust_entity name="air.humidity" energy="500" rate="0.2" method="/second"/>
+				</state>
+			</states>
+		</device>
+	</devices>
+	<statemachines>
+	  <device name="bulb">
+		<events>
+			<event>bturnon</event>
+			<event>bturnoff</event>
+		</events>
+		<states>
+		  <state init="false">bon</state>
+		  <state init="true">boff</state>
+		</states>
+		<transitions>
+		  <transition from="bon" event="bturnoff" action="boffpulse" to="boff"/>
+		  <transition from="boff" event="bturnoff" action="boffpulse" to="boff"/>
+		  <transition from="bon" event="bturnon" action="bonpulse" to="bon"/>
+		  <transition from="boff" event="bturnon" action="bonpulse" to="bon"/>
+		</transitions>
+	  </device>
+	  <device name="blind">
+		<events>
+			<event>bopen</event>
+			<event>bclose</event>
+		</events>
+		<states>
+		  <state init="false">bopen</state>
+		  <state init="true">bclosed</state>
+		</states>
+		<transitions>
+		  <transition from="bopen" event="bclose" action="bclosepulse" to="bclosed"/>
+		  <transition from="bclosed" event="bclose" action="bclosepulse" to="bclosed"/>
+		  <transition from="bopen" event="bopen" action="bopenpulse" to="bopen"/>
+		  <transition from="bclosed" event="bopen" action="bopenpulse" to="bopen"/>
+		</transitions>
+	  </device>
+	  <device name="projector">
+		<events>
+			<event>pturnon</event>
+			<event>pturnoff</event>
+		</events>
+		<states>
+		  <state init="false">pon</state>
+		  <state init="true">poff</state>
+		</states>
+		<transitions>
+		  <transition from="pon" event="pturnoff" action="poffpulse" to="poff"/>
+		  <transition from="poff" event="pturnoff" action="poffpulse" to="poff"/>
+		  <transition from="pon" event="pturnon" action="ponpulse" to="pon"/>
+		  <transition from="poff" event="pturnon" action="ponpulse" to="pon"/>
+		</transitions>
+	  </device>
+	  <device name="mc">
+		<events>
+			<event>mturnon</event>
+			<event>mturnoff</event>
+		</events>
+		<states>
+		  <state init="false">mon</state>
+		  <state init="true">moff</state>
+		</states>
+		<transitions>
+		  <transition from="mon" event="mturnoff" action="moffpulse" to="moff"/>
+		  <transition from="moff" event="mturnoff" action="moffpulse" to="moff"/>
+		  <transition from="mon" event="mturnon" action="monpulse" to="mon"/>
+		  <transition from="moff" event="mturnon" action="monpulse" to="mon"/>
+		</transitions>
+	  </device>
+	  <device name="window">
+		<events>
+			<event>wopen</event>
+			<event>wclose</event>
+		</events>
+		<states>
+		  <state init="false">wopen</state>
+		  <state init="true">wclosed</state>
+		</states>
+		<transitions>
+		  <transition from="wopen" event="wclose" action="wclosepulse" to="wclosed"/>
+		  <transition from="wclosed" event="wclose" action="wclosepulse" to="wclosed"/>
+		  <transition from="wopen" event="wopen" action="wopenpulse" to="wopen"/>
+		  <transition from="wclosed" event="wopen" action="wopenpulse" to="wopen"/>
+		</transitions>
+	  </device>
+	  <device name="ac">
+		<events>
+			<event>turnoncold</event>
+			<event>turnonhot</event>
+			<event>aturnoff</event>
+		</events>
+		<states>
+		  <state init="false">coldon</state>
+		  <state init="false">hoton</state>
+		  <state init="true">aoff</state>
+		</states>
+		<transitions>
+		  <transition from="aoff" event="aturnoff" action="aoffpulse" to="aoff"/>
+		  <transition from="aoff" event="turnoncold" action="coldpulse" to="coldon"/>
+		  <transition from="aoff" event="turnonhot" action="hotpulse" to="hoton"/>
+		  <transition from="coldon" event="aturnoff" action="aoffpulse" to="aoff"/>
+		  <transition from="coldon" event="turnoncold" action="coldpulse" to="coldon"/>
+		  <transition from="coldon" event="turnonhot" action="hotpulse" to="hoton"/>
+		  <transition from="hoton" event="aturnoff" action="aoffpulse" to="aoff"/>
+		  <transition from="hoton" event="turnoncold" action="coldpulse" to="coldon"/>
+		  <transition from="hoton" event="turnonhot" action="hotpulse" to="hoton"/>
+		</transitions>
+	  </device>
+	  <device name="af">
+		<events>
+			<event>afturnon</event>
+			<event>afturnoff</event>
+		</events>
+		<states>
+		  <state init="false">afon</state>
+		  <state init="true">afoff</state>
+		</states>
+		<transitions>
+		  <transition from="afon" event="afturnoff" action="afoffpulse" to="afoff"/>
+		  <transition from="afoff" event="afturnoff" action="afoffpulse" to="afoff"/>
+		  <transition from="afon" event="afturnon" action="afonpulse" to="afon"/>
+		  <transition from="afoff" event="afturnon" action="afonpulse" to="afon"/>
+		</transitions>
+	  </device>
+	  <device name="ah">
+		<events>
+			<event>ahturnon</event>
+			<event>ahturnoff</event>
+		</events>
+		<states>
+		  <state init="false">ahon</state>
+		  <state init="true">ahoff</state>
+		</states>
+		<transitions>
+		  <transition from="ahon" event="ahturnoff" action="ahoffpulse" to="ahoff"/>
+		  <transition from="ahoff" event="ahturnoff" action="ahoffpulse" to="ahoff"/>
+		  <transition from="ahon" event="ahturnon" action="ahonpulse" to="ahon"/>
+		  <transition from="ahoff" event="ahturnon" action="ahonpulse" to="ahon"/>
+		</transitions>
+	  </device>
+	  <device name="fan">
+		<events>
+			<event>fturnon</event>
+			<event>fturnoff</event>
+		</events>
+		<states>
+		  <state init="false">fon</state>
+		  <state init="true">foff</state>
+		</states>
+		<transitions>
+		  <transition from="fon" event="fturnoff" action="foffpulse" to="foff"/>
+		  <transition from="foff" event="fturnoff" action="foffpulse" to="foff"/>
+		  <transition from="fon" event="fturnon" action="fonpulse" to="fon"/>
+		  <transition from="foff" event="fturnon" action="fonpulse" to="fon"/>
+		</transitions>
+	  </device>
+	  <device name="heater">
+		<events>
+			<event>hturnon</event>
+			<event>hturnoff</event>
+		</events>
+		<states>
+		  <state init="false">hon</state>
+		  <state init="true">hoff</state>
+		</states>
+		<transitions>
+		  <transition from="hon" event="hturnoff" action="hoffpulse" to="hoff"/>
+		  <transition from="hoff" event="hturnoff" action="hoffpulse" to="hoff"/>
+		  <transition from="hon" event="hturnon" action="honpulse" to="hon"/>
+		  <transition from="hoff" event="hturnon" action="honpulse" to="hon"/>
+		</transitions>
+	  </device>
+	</statemachines>
+</ontology>

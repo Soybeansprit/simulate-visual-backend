@@ -49,23 +49,23 @@ public class StaticAnalysisService {
 		List<BiddableType> biddables=environmentModel.getBiddables();
 		
 		
-		/////移除incorrect rules
-//		List<Rule> incorrectRules=getIncorrect(rules, templGraphs);
-		List<ErrorReason> incorrectRules=getIncorrect(rules, devices);
-		
-		
-		Iterator<Rule> iteratorRules=rules.iterator();
-		while(iteratorRules.hasNext()) {
-			Rule rule=iteratorRules.next();			
-			for(ErrorReason er:incorrectRules) {
-				if(rule.getRuleName().equals(er.rule.getRuleName())) {
-					iteratorRules.remove();
-				}
-			}
-		}
+		/////移除incorrect rules		
+//		List<ErrorReason> incorrectRules=getIncorrect(rules, devices);
+//		
+//		
+//		Iterator<Rule> iteratorRules=rules.iterator();
+//		while(iteratorRules.hasNext()) {
+//			Rule rule=iteratorRules.next();			
+//			for(ErrorReason er:incorrectRules) {
+//				if(rule.getRuleName().equals(er.rule.getRuleName())) {
+//					iteratorRules.remove();
+//				}
+//			}
+//		}
 		///////////////////删除重复的规则
 		List<Rule> newRules=deleteRepeat(rules);
 		
+		long unusedStartTime=System.currentTimeMillis();
 		generateIFD(newRules, ifdFileName, filePath, devices, sensors, biddables);
 		List<GraphNode> nodes=getIFDNode(ifdFileName, filePath);
 		List<GraphNode> ruleNodes=new ArrayList<GraphNode>();
@@ -76,8 +76,9 @@ public class StaticAnalysisService {
 			}
 		}
 		///////////获得unused
+		
 		List<ErrorReason> unusedRules=getUnused(ruleNodes, devices,biddables,mapRules);
-		System.out.println(unusedRules);
+//		System.out.println(unusedRules);
 		Iterator<Rule> iteratorNewRules=newRules.iterator();
 		//////////删掉unused
 		while(iteratorNewRules.hasNext()) {
@@ -89,6 +90,9 @@ public class StaticAnalysisService {
 				}
 			}
 		}
+		System.out.println("unusedTime:"+(System.currentTimeMillis()-unusedStartTime));
+		
+		long redundantStartTime=System.currentTimeMillis();
 		generateIFDForBest(newRules, ifdFileName, filePath, devices, sensors, biddables);
 		ruleNodes.clear();
 		nodes.clear();
@@ -116,7 +120,11 @@ public class StaticAnalysisService {
 				redundantRules.add(reRules);
 			}
 		}
-		System.out.println(redundantRuleNodes);
+		System.out.println("redundantTime:"+(System.currentTimeMillis()-redundantStartTime));
+//		System.out.println(redundantRuleNodes);
+		
+		///////////获得incompleteness
+		long incompleteStartTime=System.currentTimeMillis();
 		List<Action> actions=RuleService.getAllActions(newRules, devices);
 		List<DeviceDetail> cannotOffDevices=getIncompleteness(devices, actions);
 		List<String> incompleteness=new ArrayList<String>();
@@ -129,8 +137,8 @@ public class StaticAnalysisService {
 				}
 			}
 		}
-		
-		staticAnalysisResult.setIncorrectRules(incorrectRules);
+		System.out.println("incomleteTime:"+(System.currentTimeMillis()-incompleteStartTime));
+//		staticAnalysisResult.setIncorrectRules(incorrectRules);
 		staticAnalysisResult.setUnusedRules(unusedRules);
 		staticAnalysisResult.setRedundantRules(redundantRules);
 		staticAnalysisResult.setIncompleteness(incompleteness);
@@ -206,7 +214,7 @@ public class StaticAnalysisService {
 	public static List<ErrorReason> getUnused(List<GraphNode> ruleNodes,List<DeviceDetail> devices,List<BiddableType> biddables,HashMap<String,Rule> mapRules){
 		List<ErrorReason> unusedRules=new ArrayList<ErrorReason>();
 		for(GraphNode ruleNode:ruleNodes) {
-			String reason=isUnused(ruleNode,devices,biddables);
+			String reason=isUnused(ruleNode,null,devices,biddables);
 			if(!reason.equals("")) {
 				////isUnused
 				Rule unusedRule=mapRules.get(ruleNode.getName());
@@ -220,7 +228,7 @@ public class StaticAnalysisService {
 	}
 	
 	//规则是否无法被触发
-	public static String isUnused(GraphNode ruleNode,List<DeviceDetail> devices,List<BiddableType> biddables) {
+	public static String isUnused(GraphNode ruleNode,GraphNode pRuleNode,List<DeviceDetail> devices,List<BiddableType> biddables) {
 		String reason="";
 		List<GraphNode> triggerNodes=new ArrayList<GraphNode>();
 		for(GraphNodeArrow pArrow:ruleNode.getpNodeList()) {
@@ -284,7 +292,12 @@ public class StaticAnalysisService {
 												for(GraphNodeArrow ppArrow:actionNode.getpNodeList()) {
 													if(ppArrow.getGraphNode().getShape().equals("hexagon")) {
 														GraphNode pruleNode=ppArrow.getGraphNode();
-														if(isUnused(pruleNode, devices,biddables).equals("")) {
+														///////需要避免循环调用
+														if(pruleNode==pRuleNode) {
+															return null;
+														}
+														String unused=isUnused(pruleNode,ruleNode, devices,biddables);
+														if(unused!=null&&unused.equals("")) {
 															cantriggered=true;
 															break;
 														}
@@ -409,7 +422,7 @@ public class StaticAnalysisService {
 					otherCauseRuleNodes.add(otherRuleNode);
 					if(containActionNode(ruleNode, otherRuleNode)) {
 						/////////////otherRule包含rule的所有action
-						List<GraphNode> pathRuleLists=canTraceBack(ruleNode, otherRuleNode,graphNodes);
+						List<GraphNode> pathRuleLists=canTraceBack(ruleNode, otherRuleNode,null,graphNodes,0);
 						if(pathRuleLists!=null) {
 							////////////且otherRule的triggers都能回溯到ruleNode的triggers
 							/////说明是冗余的
@@ -429,7 +442,7 @@ public class StaticAnalysisService {
 			////如果其action都能被其他一组rule执行，但是没有一条与它冗余
 			/////则看这一组规则各自的triggers能否回溯到该rule的triggers
 			for(GraphNode otherRuleNode:otherCauseRuleNodes) {
-				List<GraphNode> pathRuleList=canTraceBack(ruleNode, otherRuleNode,graphNodes);
+				List<GraphNode> pathRuleList=canTraceBack(ruleNode, otherRuleNode,null,graphNodes,0);
 				if(pathRuleList!=null) {
 					redundantNodes.addAll(pathRuleList);
 				}
@@ -459,7 +472,7 @@ public class StaticAnalysisService {
 		return redundantNodes;
 	}
 		
-	public static List<GraphNode> canTraceBack(GraphNode ruleNode,GraphNode otherRuleNode,List<GraphNode> graphNodes){
+	public static List<GraphNode> canTraceBack(GraphNode ruleNode,GraphNode otherRuleNode,GraphNode cRuleNode,List<GraphNode> graphNodes,int count){
 		List<GraphNode> ruleList=new ArrayList<GraphNode>();
 		List<GraphNode> triggerNodes=new ArrayList<GraphNode>();
 		////获得ruleNode的所有trigger节点
@@ -491,12 +504,13 @@ public class StaticAnalysisService {
 					GraphNode pNode=nodepArrow.getGraphNode();
 					if(nodepArrow.getStyle()==""&&pNode.getShape().indexOf("doubleoctagon")<0&&!pNode.flag) {
 						////实线
-						if(pNode.getShape().indexOf("hexagon")>=0 && !pNode.getName().equals(ruleNode.getName())) {
+						if(pNode.getShape().indexOf("hexagon")>=0 && !pNode.getName().equals(ruleNode.getName())&&pNode!=cRuleNode&&count<=5) {
 							List<GraphNode> pRuleList=new ArrayList<GraphNode>();
-							
-							if((pRuleList=canTraceBack(ruleNode, pNode, graphNodes))!=null) {
+							/////同样需要避免进入死循环，要跳出调度
+							count++;
+							if((pRuleList=canTraceBack(ruleNode, pNode,otherRuleNode, graphNodes,count))!=null) {
 								ruleList.addAll(pRuleList);
-							}
+							}							
 						}else {
 							nodeQueue.add(pNode);
 							pNode.flag=true;

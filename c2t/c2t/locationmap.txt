@@ -1,0 +1,3 @@
+living room->living room
+entryway->entryway
+home->entryway,living room
