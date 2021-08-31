@@ -80,8 +80,8 @@ public class Controller {
         outputStream.close();
         //逻辑处理
         System.out.println(fileName + "上传成功");
-        RuleService.getAudioToRules(fileName, AddressService.MODEL_FILE_PATH, AddressService.CONVERT_TOOL_PATH);
-        return getRules(fileName, AddressService.MODEL_FILE_PATH);
+        String rules=RuleService.getAudioToRules(fileName, AddressService.MODEL_FILE_PATH, AddressService.CONVERT_TOOL_PATH);
+        return rules;
 	}
 	
 	

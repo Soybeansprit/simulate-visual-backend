@@ -7,7 +7,7 @@ public class AddressService {
 	public final static String IFD_FILE_NAME="ifd.dot";
 	public final static String SIMULATE_RESULT_FILE_PATH="D:\\workspace\\resultFile\\";
 	public final static String VIDEO_PATH="D:\\workspace\\videoFile\\";
-	public final static String CONVERT_TOOL_PATH="D:\\Program\\Java\\workplace\\simulation-visualization\\c2t\\c2t\\c2t.py";
+	public final static String CONVERT_TOOL_PATH="D:\\workspace\\c2t\\c2t\\";
 	
 //	public final static String MODEL_FILE_PATH= "/root/TAPs-Visual/workspace/modelFile/";
 //	public final static String UPPAAL_PATH="/root/TAPs/workspace/uppaal64-4.1.24/bin-Linux/";

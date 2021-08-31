@@ -376,9 +376,11 @@ public class RuleService {
 
 //		  		System.out.println(command.toString());
 		  		Process process = Runtime.getRuntime().exec(getCMDCommand(convertToolPath, audioFileName, audioPath));
+		  		
 		  		error = process.getErrorStream();
 //		  		long startTime0=System.currentTimeMillis();
 		  		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream(),Charset.forName("UTF-8")));
+		  		BufferedReader errorReader=new BufferedReader(new InputStreamReader(error,Charset.forName("GBK")));
 //		  		long endTime0=System.currentTimeMillis();
 //	  			System.out.println("simulationData time: "+(endTime0-startTime0));
 		  		StringBuffer resultBuffer = new StringBuffer();
@@ -388,8 +390,18 @@ public class RuleService {
 		  			System.out.println("null");
 		  		}
 		  		while (s != null) {
+		  			System.out.println(s);
 //		  			System.out.println(s);
-		  			resultBuffer.append(s+"\n");
+		  			String[] ss=s.split(",");
+		  			for(int i=0;i<ss.length;i++) {
+			  			if(ss[i].indexOf("'")>=0&&ss[i].indexOf("\\n'")>=0) {
+			  				ss[i]=ss[i].substring(ss[i].indexOf("'"), ss[i].indexOf("\\n'")).substring(1);
+				  			System.out.println(ss[i]);
+				  			resultBuffer.append(ss[i]+"\n");
+			  			}
+
+		  			}
+
 //		  			long startTime=System.currentTimeMillis();
 		  			s = bufferedReader.readLine();
 //		  			long endTime=System.currentTimeMillis();
@@ -399,7 +411,13 @@ public class RuleService {
 //		  			}
 		  			
 		  		}
+		  		s=errorReader.readLine();
+		  		while(s!=null) {
+		  			System.out.println(s);
+		  			s=errorReader.readLine();
+		  		}
 		  		bufferedReader.close();
+		  		errorReader.close();
 		  		process.waitFor();
 		  		String result=resultBuffer.toString();
 //		  		int formulaIsSatisfiedIndex=result.indexOf("Formula is satisfied.");
@@ -422,10 +440,12 @@ public class RuleService {
 	
 	public static String getCMDCommand(String convertToolPath,String audioFileName,String audioFilePath) {
   		StringBuffer command = new StringBuffer();
-  		command.append("cmd /c ");
+  		command.append("cmd /c d:");
   		//这里的&&在多条语句的情况下使用，表示等上一条语句执行成功后在执行下一条命令，
   		//也可以使用&表示执行上一条后台就立刻执行下一条语句
-  		command.append(String.format(" && python3 %s %s",convertToolPath,audioFilePath+audioFileName));
+  		command.append(String.format("&& cd %s",convertToolPath));
+  		command.append(String.format(" && python %s %s","c2t.py",audioFilePath+audioFileName));
+  		System.out.println(command.toString());
   		
   		return command.toString();
 	}
@@ -434,7 +454,8 @@ public class RuleService {
   		StringBuffer command = new StringBuffer();
   		//这里的&&在多条语句的情况下使用，表示等上一条语句执行成功后在执行下一条命令，
   		//也可以使用&表示执行上一条后台就立刻执行下一条语句
-  		command.append(String.format("python 3 %s %s", convertToolPath,audioFilePath+audioFileName));
+  		command.append(String.format("cd %s", convertToolPath));
+  		command.append(String.format("&& python  %s %s", "c2t.py",audioFilePath+audioFileName));
   		
   		return command.toString();
 	}
