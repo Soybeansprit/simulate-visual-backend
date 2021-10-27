@@ -81,6 +81,7 @@ public class Controller {
         //逻辑处理
         System.out.println(fileName + "上传成功");
         String rules=RuleService.getAudioToRules(fileName, AddressService.MODEL_FILE_PATH, AddressService.CONVERT_TOOL_PATH);
+        System.out.println(rules);
         return rules;
 	}
 	
@@ -227,7 +228,7 @@ public class Controller {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		String path=AddressService.VIDEO_PATH+"video.mp4";
+		String path="video.mp4";
 		List<String> path0=new ArrayList<String>();
 		System.out.println(path);
 		path0.add("video.mp4");

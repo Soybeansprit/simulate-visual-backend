@@ -392,13 +392,15 @@ public class RuleService {
 		  		while (s != null) {
 		  			System.out.println(s);
 //		  			System.out.println(s);
+		  			s=s.substring(1, s.length()-1);
 		  			String[] ss=s.split(",");
 		  			for(int i=0;i<ss.length;i++) {
-			  			if(ss[i].indexOf("'")>=0&&ss[i].indexOf("\\n'")>=0) {
-			  				ss[i]=ss[i].substring(ss[i].indexOf("'"), ss[i].indexOf("\\n'")).substring(1);
-				  			System.out.println(ss[i]);
+		  				ss[i]=ss[i].trim();
+		  				if(ss[i].startsWith("'")&&ss[i].endsWith("'")) {
+		  					ss[i]=ss[i].substring(1, ss[i].length()-1);
+		  					System.out.println(ss[i]);
 				  			resultBuffer.append(ss[i]+"\n");
-			  			}
+		  				}
 
 		  			}
 
