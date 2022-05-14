@@ -235,13 +235,14 @@ public class TemplGraphService {
 			}else if(templGraph.getName().equals("Attribute")) {			
 				////获得attribute
 				existAttribute=true;
+
 				attributes=getAttributes(templGraph);
 			}
 		}
-		if(!existAttribute) {
-			/////不存在Attribute模型
-			attributes=null;
-		}
+//		if(!existAttribute) {
+//			/////不存在Attribute模型
+//			attributes=new ArrayList<>();
+//		}
 		/////设备类型
 		List<DeviceType> deviceTypes=TemplGraphService.getDeviceTypes(controlledDevices,attributes);
 		///传感器类型
@@ -573,6 +574,7 @@ public class TemplGraphService {
 		for(String invariant : invariants) {
 			invariant=invariant.trim();
 			Attribute attribute=new Attribute();
+			attribute.setHasAttributeModel(true);  ///有Attribute模型
 			attribute.setContent(invariant);
 			attribute.setAttribute(invariant.substring(0, invariant.indexOf("'==")));
 			attribute.setDelta(invariant.substring(invariant.indexOf("'==")+"'==".length()).trim());
@@ -626,35 +628,47 @@ public class TemplGraphService {
 		//////////
 		
 		/////////doorway///////
-		TemplGraphNode doorwayNode=new TemplGraphNode();
-		doorwayNode.id="id1";
-		doorwayNode.name="Doorway";
-		doorwayNode.invariant="time<=t0";
-		person.addTemplGraphNode(doorwayNode);
-		parameter.append("double t0");
+//		TemplGraphNode doorwayNode=new TemplGraphNode();
+//		doorwayNode.id="id1";
+//		doorwayNode.name="Doorway";
+//		doorwayNode.invariant="time<=t0";
+//		person.addTemplGraphNode(doorwayNode);
+//		parameter.append("double t0");
 		//////location/////////
-		getTwoNodesRelation(startNode, doorwayNode, "position=0", "", "", "");
-		TemplGraphNode sourceNode=doorwayNode;
+//		getTwoNodesRelation(startNode, doorwayNode, "position=0", "", "", "");
+		TemplGraphNode sourceNode=startNode;
 		for(int i=0;i<locations.size();i++) {
 			TemplGraphNode locationNode=new TemplGraphNode();
-			locationNode.id="id"+(i+2);
+			locationNode.id="id"+(i+1);
 			locationNode.name=locations.get(i);
 //			if(i<locations.size()-1) {
 //				locationNode.invariant="time<=t"+(i+1);
 //				parameter.append(",double t"+(i+1));
 //			}
-			locationNode.invariant="time<=t"+(i+1);
-			parameter.append(",double t"+(i+1));
+			if (i!=locations.size()-1){
+				///不是最后一个节点
+				locationNode.invariant="time<=t"+i;
+				if (i>0) parameter.append(",");
+				parameter.append("double t"+i);
+			}
+
 			person.addTemplGraphNode(locationNode);
-			getTwoNodesRelation(sourceNode, locationNode, "position="+(i+1), "", "time>=t"+i, "");
+			if (i==0){
+				//第一个节点
+				getTwoNodesRelation(sourceNode,locationNode,"position="+i,"","","");
+			}else {
+				getTwoNodesRelation(sourceNode, locationNode, "position="+i, "", "time>=t"+(i-1), "");
+			}
+
+
 			sourceNode=locationNode;
 		}
 		//////Out//////
-		TemplGraphNode outNode=new TemplGraphNode();
-		outNode.id="id"+(1+locations.size()+1);
-		outNode.name="Out";
-		person.addTemplGraphNode(outNode);
-		getTwoNodesRelation(sourceNode, outNode, "position="+(1+locations.size()), "", "time>=t"+locations.size(), "");
+//		TemplGraphNode outNode=new TemplGraphNode();
+//		outNode.id="id"+(1+locations.size()+1);
+//		outNode.name="Out";
+//		person.addTemplGraphNode(outNode);
+//		getTwoNodesRelation(sourceNode, outNode, "position="+(1+locations.size()), "", "time>=t"+locations.size(), "");
 		
 		person.setParameter(parameter.toString());
 		

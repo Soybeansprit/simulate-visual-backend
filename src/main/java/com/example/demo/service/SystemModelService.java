@@ -528,7 +528,7 @@ public class SystemModelService {
 		}
 		////对models用","拼接
 		sb.append(String.join(",", models));
-		if(attributes!=null) {
+		if(attributes.size()>0&&attributes.get(0).isHasAttributeModel()) {
 			sb.append(",Attribute");
 		}
 		sb.append(";");
@@ -665,7 +665,7 @@ public class SystemModelService {
 		}
 		
 		////如果没有Attribute模型,就通过这种方式找clock
-		if(attributes.size()==0||attributes==null) {
+		if(attributes==null||attributes.size()==0) {
 			for(String[] declaration:declarations) {
 				if(declaration[0].equals("double")) {
 					//////////找到clock类型的参数
@@ -677,6 +677,10 @@ public class SystemModelService {
 								invariant=invariant.trim();
 								if(invariant.startsWith(declaration[1]+"'")) {
 									declaration[0]="clock";
+									Attribute attribute=new Attribute();
+									attribute.setAttribute(declaration[1]);
+									if (attributes==null) attributes=new ArrayList<>();
+									attributes.add(attribute);
 									break templ;
 								}
 							}
